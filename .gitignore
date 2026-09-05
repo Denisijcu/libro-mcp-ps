@@ -1,0 +1,103 @@
+# =============================================================
+#  Repositorio publico del libro "PowerShell con agentes"
+#
+#  Lo que SE PUBLICA:  el codigo de los capitulos y las pruebas
+#  Lo que NO:          el manuscrito, la portada y las notas
+# =============================================================
+
+# -------------------------------------------------------------
+#  EL LIBRO EN SI  --  esto NO va al repositorio
+# -------------------------------------------------------------
+# El manuscrito es el producto que se vende. Subirlo aqui es
+# publicarlo gratis, y en git no basta con borrarlo despues:
+# queda en el historial para siempre.
+manuscrito/
+*.epub
+*.docx
+
+# Notas internas de trabajo: plan, bitacora, bloqueadores.
+PLAN.md
+
+# La portada es un activo con derechos. Fuera.
+assets/portada.jpg
+assets/portada.png
+assets/*.psd
+assets/*.xcf
+
+# El generador del libro no le sirve a nadie sin el manuscrito.
+# Quita esta linea si prefieres publicarlo como ejemplo.
+construir_epub.py
+
+# -------------------------------------------------------------
+#  SECRETOS  --  nunca, bajo ningun concepto
+# -------------------------------------------------------------
+.env
+.env.*
+*.key
+*.pem
+secrets.json
+# El banco de pruebas lee las claves de variables de entorno,
+# no de archivos. Si algun dia creas uno, que caiga aqui.
+claves.txt
+api_keys.txt
+
+# -------------------------------------------------------------
+#  SALIDAS DE EJECUCION
+# -------------------------------------------------------------
+# Resultados crudos de los bancos de pruebas: se regeneran y
+# llevan nombres de maquina y rutas locales.
+codigo/**/resultados_*.json
+
+# Cuarentena, auditoria y baselines del servidor. Contienen
+# rutas, nombres de cuenta y actividad de la maquina real.
+.psmcp/
+*.jsonl
+quarantine/
+baselines/
+
+# Capturas de red: contenido de trafico real.
+*.pcap
+*.pcapng
+
+# El cebo del capitulo 11 se genera al vuelo.
+cap11_cebo/
+
+# -------------------------------------------------------------
+#  PYTHON
+# -------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+build/
+dist/
+
+# Entornos virtuales
+venv/
+.venv/
+env/
+ENV/
+
+# -------------------------------------------------------------
+#  EDITOR Y SISTEMA
+# -------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*~
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# -------------------------------------------------------------
+#  TEMPORALES
+# -------------------------------------------------------------
+*.tmp
+*.bak
+*.log
+temp/
+tmp/

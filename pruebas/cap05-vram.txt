@@ -1,0 +1,58 @@
+Fecha   : 2026-09-04
+Maquina : HP-OMEN / Windows 11 Home 25H2 build 26200.8973
+---
+
+=== LA VRAM QUE REPORTA WMI ES FALSA ===
+
+> Get-CimInstance Win32_VideoController | Select Name, AdapterRAM
+
+Nombre     : NVIDIA GeForce GTX 1660 Ti
+VRAM_GB    : 4
+Driver     : 32.0.15.9595
+Resolucion : 2560x1440
+
+> nvidia-smi --query-gpu=name,memory.total,memory.used,memory.free,driver_version --format=csv
+
+name, memory.total [MiB], memory.used [MiB], memory.free [MiB], driver_version
+NVIDIA GeForce GTX 1660 Ti, 6144 MiB, 5865 MiB, 102 MiB, 595.95
+
+LA TARJETA TIENE 6 GB. WMI dice 4.
+
+CAUSA:
+  Win32_VideoController.AdapterRAM es un uint32, y su valor maximo
+  representable es 4 294 967 295 bytes, o sea 4 GiB exactos. Cualquier tarjeta
+  con mas de 4 GB reporta 4. No es un error de esta maquina ni del driver: es
+  el tipo de dato del esquema WMI, que se qued\u00f3 corto hace anos.
+
+  Es la misma clase de trampa que ProductName diciendo "Windows 10" en un
+  Windows 11 (capitulo 12): un dato FALSO con apariencia de correcto. No da
+  error, no salta nada, y quien lo lea decidira mal.
+
+CONSECUENCIA PRACTICA:
+  Una herramienta que compruebe "cabe este modelo en mi GPU?" leyendo WMI
+  concluira que caben 4 GB. Con un modelo de 5 GB dira que no cabe, cuando si
+  cabe. Y al reves en tarjetas grandes: una 4090 de 24 GB tambien reporta 4.
+
+FUENTE CORRECTA:
+  nvidia-smi para NVIDIA. Tambien sirve la clave del registro del driver o
+  DXGI, pero nvidia-smi es lo mas directo y viene con el driver.
+
+  Comando util para un servidor MCP:
+    nvidia-smi --query-gpu=name,memory.total,memory.used,memory.free --format=csv,noheader
+
+  Los otros dos numeros de esa salida importan tanto como el total:
+
+    memory.used : 5865 MiB
+    memory.free :  102 MiB
+
+  En el momento de la medicion habia un modelo cargado en LM Studio ocupando
+  casi toda la tarjeta. Ese es el estado normal de una maquina que trabaja con
+  modelos locales: la VRAM esta llena casi siempre.
+
+  Por eso "el modelo de X GB cabe en mi tarjeta de 6 GB" es la pregunta
+  equivocada. La correcta es "cabe en lo que queda libre AHORA", y eso incluye
+  lo que consumen el escritorio, el navegador y la resolucion de pantalla.
+
+DATO ADICIONAL:
+  La resolucion es 2560x1440. El escritorio de Windows a esa resolucion ya
+  consume VRAM antes de cargar nada.

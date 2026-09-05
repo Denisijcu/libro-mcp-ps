@@ -1,0 +1,81 @@
+Fecha   : 2026-09-04
+Maquina : HP Omen / Windows 11 build 26100 / usuario denis
+PowerShell: 5.1.26100.8972
+Python  : 3.14.3
+Comando : python demo_inyeccion.py
+Cwd     : F:\libro-mcp-ps\codigo\v08-inyeccion
+Version : ANTES del arreglo del reporte de errores (ver nota al final)
+---
+Demostracion de inyeccion de comandos en un servidor MCP de PowerShell
+Carga util inofensiva: crear un archivo marcador en %TEMP%
+
+=== VERSION VULNERABLE (f-string) ===
+Valor enviado : denis'; Set-Content -Path $env:TEMP\PWNED_DEMO_CAP8.txt -Value 'inyeccion ejecutada'; '
+Salida        : Name  Enabled Description
+----  ------- -----------
+denis True
+
+{
+    "Name":  null,
+    "Enabled":  null
+}
+RESULTADO     : VULNERABLE. Se creo C:\Users\denis\AppData\Local\Temp\PWNED_DEMO_CAP8.txt
+                Contenido: inyeccion ejecutada
+
+=== VERSION SEGURA (variables de entorno) ===
+Valor enviado : denis'; Set-Content -Path $env:TEMP\PWNED_DEMO_CAP8.txt -Value 'inyeccion ejecutada'; '
+Salida        : [ERROR] Codigo 1:
+RESULTADO     : SEGURO. No se creo C:\Users\denis\AppData\Local\Temp\PWNED_DEMO_CAP8.txt
+
+=== Comprobacion de que la version segura sigue funcionando ===
+get_user_info('denis') -> {
+    "Name":  "denis",
+    "Enabled":  true
+}
+list_directory('C:\\')     -> [
+    {
+        "Name":  "inetpub"
+    },
+    {
+        "Name":  "PerfLogs"
+    },
+    {
+        "Name":  "Program Files
+search_software('Python')  -> [
+    {
+        "DisplayName":  "Python 3.12.0 Test Suite (64-bit)"
+    },
+    {
+        "DisplayName":  "Python 3.12.0
+
+--- VEREDICTO ---
+La version con f-string ejecuto codigo ajeno : True
+La version con env vars resistio             : True
+
+===============================================================
+NOTAS SOBRE ESTA EJECUCION
+===============================================================
+
+1. La inyeccion no parece un error.
+   La salida de la version vulnerable arranca con una tabla de Get-LocalUser en
+   formato por defecto y termina con un JSON de nulls. Ninguna de las dos cosas
+   parece un ataque. Descomposicion de lo que ejecuto PowerShell:
+
+     Get-LocalUser -Name 'denis'                 <- tabla (statement suelto)
+     Set-Content -Path $env:TEMP\PWNED...        <- la carga util
+     '' | Select-Object Name, Enabled | ConvertTo-Json   <- el JSON de nulls
+
+   El pipeline original quedo partido en tres. El modelo recibe algo que se
+   parece bastante a una respuesta valida.
+
+2. Defecto encontrado en la version segura.
+   Devolvio "[ERROR] Codigo 1:" con el mensaje vacio. Resiste la inyeccion, pero
+   el diagnostico se pierde: con ErrorActionPreference en SilentlyContinue,
+   PowerShell no escribe en stderr y solo queda el codigo de salida. Un modelo que
+   recibe eso no puede decidir nada.
+
+   Arreglado el 2026-09-04 anadiendo EPILOGO_ERRORES a seguro.py: se lee $Error[0]
+   al final del script y se emite por stderr con el prefijo PSERROR.
+
+   PENDIENTE: re-ejecutar la demo y guardar la salida en
+   cap08-demo-inyeccion-v2.txt para citar el mensaje de error util en el capitulo.

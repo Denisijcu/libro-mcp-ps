@@ -1,0 +1,73 @@
+Fecha   : 2026-09-04
+Maquina : HP-OMEN / Windows 11 Home 25H2 build 26200.8973
+Estado  : maquina de trabajo normal, sin incidente conocido
+---
+
+=== ENTRADAS DE ARRANQUE AUTOMATICO (claves Run) ===
+
+Total entradas Run: 7
+
+HKLM:  ->  SecurityHealth
+HKLM:  ->  CDAServer
+HKLM:  ->  HPSEU_Host_Launcher
+HKCU:  ->  OneDrive
+HKCU:  ->  HPSEU_Host_Launcher
+HKCU:  ->  Docker Desktop
+HKCU:  ->  electron.app.LM Studio
+
+LECTURA:
+  Siete entradas, todas explicables: Defender, dos del fabricante (HP),
+  OneDrive, Docker Desktop y LM Studio. Ninguna invoca un interprete de
+  scripts ni apunta a una carpeta de usuario.
+
+  Este es el aspecto de una maquina limpia. Conviene tenerlo delante para
+  saber contra que se compara un hallazgo real.
+
+
+=== PROCESOS CON HALLAZGOS ===
+
+Procesos con hallazgos: 16 de 359
+
+15x  Firma[NotSigned]
+ 1x  RutaUsuario
+
+Desglose de los no firmados:
+
+10x  postgres.exe
+ 2x  httpd.exe
+ 1x  KPR_NCD.exe
+ 1x  WidgetService.exe
+ 1x  pg_ctl.exe
+
+LECTURA:
+  16 de 359 procesos levantan la mano en una maquina SIN incidente. Un 4,5%.
+
+  Y los 15 sin firma son, uno por uno, software legitimo:
+    - postgres.exe / pg_ctl.exe : PostgreSQL. Los binarios oficiales de la
+      distribucion de PostgreSQL para Windows no vienen firmados con
+      Authenticode. Diez procesos porque Postgres lanza un proceso por
+      conexion y tareas de fondo.
+    - httpd.exe : Apache. Mismo caso.
+    - KPR_NCD.exe : Kindle Previewer 3.
+    - WidgetService.exe : componente de terceros.
+
+  NINGUNO es malware.
+
+ESTE ES EL DATO MAS IMPORTANTE DEL CAPITULO 13:
+
+  Una herramienta de hunting sobre una maquina limpia devuelve 16 hallazgos.
+  Si el modelo interpreta "hallazgo" como "amenaza", diagnostica ROJO en una
+  maquina sana, y a la tercera vez el usuario deja de hacerle caso.
+
+  El valor de la herramienta no esta en detectar: esta en detectar POCO y
+  explicar por que cada cosa esta marcada, para que el analista pueda
+  descartarla en segundos.
+
+
+=== PENDIENTE [VERIFICAR: Denis] ===
+
+  - Ejecutar el servidor de hunting completo desde un host y anotar la salida
+    de get_autoruns, get_active_connections y find_suspicious_scheduled_tasks.
+  - Comprobar que get_log_clearing_events distingue "no hay eventos" de "no
+    tengo permiso" cuando se ejecuta SIN privilegios de administrador. Es la
+    diferencia entre un verde valido y un verde falso.

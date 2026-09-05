@@ -1,0 +1,72 @@
+Fecha   : 2026-09-04
+Maquina : HP Omen / Windows 11 build 26100 / usuario denis
+Python  : 3.14.3
+Cwd     : F:\libro-mcp-ps\codigo\v09-gates
+---
+
+=== EJECUCION 1: modo por defecto (todo cerrado) ===
+
+> python gates.py
+
+Escritura permitida  : False
+Destructivo permitido: False
+1. Lectura           -> [OK] datos leidos
+2. Escritura         -> [BLOQUEADO] El servidor esta en modo SOLO LECTURA. Para permitir cambios, reinicia con PSMCP_ALLOW_WRITE=1.
+3. Destructiva       -> [BLOQUEADO] El servidor esta en modo SOLO LECTURA. Para permitir cambios, reinicia con PSMCP_ALLOW_WRITE=1.
+Para ver el flujo del token, relanza asi:
+  $env:PSMCP_ALLOW_WRITE=1; $env:PSMCP_ALLOW_DESTRUCTIVE=1; python gates.py
+
+CONFIRMA:
+  - La lectura pasa siempre, sin configurar nada.
+  - La escritura se bloquea con la puerta cerrada.
+  - La destructiva tambien, y ni siquiera llega a emitir token: el gate corta
+    antes que la logica de confirmacion. El orden de las capas es el correcto.
+
+MEJORA APLICADA TRAS VER ESTA SALIDA:
+  El caso 3 decia solo "modo SOLO LECTURA". Es cierto, pero obliga al usuario a
+  descubrir el segundo bloqueo despues de arreglar el primero. Ahora, cuando la
+  operacion es destructiva y no hay ninguna puerta abierta, el mensaje nombra
+  las dos variables de golpe. Por eso el texto del caso 3 sera distinto en la
+  siguiente ejecucion.
+
+
+=== EJECUCION 2: con las dos puertas abiertas ===
+
+> $env:PSMCP_ALLOW_WRITE=1; $env:PSMCP_ALLOW_DESTRUCTIVE=1; python gates.py
+
+Escritura permitida  : True
+Destructivo permitido: True
+1. Lectura           -> [OK] datos leidos
+2. Escritura         -> [OK] algo escrito
+3. Destructiva       -> [CONFIRMACION REQUERIDA]
+--- flujo completo del token ---
+[CONFIRMACION REQUERIDA]
+Accion  : borrar_usuario:pruebas
+Impacto : Se eliminara la cuenta local 'pruebas'. No se puede deshacer.
+Token   : 0E13E1A6  (valido 180 segundos, un solo uso)
+Muestra este impacto al usuario, espera su aprobacion explicita y vuelve a llamar a la misma herramienta anadiendo confirm_token.
+4. Token de otro objetivo -> [ERROR] El confirm_token no es valido, ha expirado, ya se uso, o pertenece a otra accion u otro objetivo. Pide uno nuevo.
+5. Token correcto         -> [OK] usuario pruebas eliminado (simulado)
+6. Reutilizar el token    -> [ERROR] El confirm_token no es valido, ha expirado, ya se uso, o pertenece a otra accion u otro objetivo. Pide uno nuevo.
+
+CONFIRMA:
+  - Con las dos puertas abiertas, lectura y escritura pasan sin friccion.
+  - La destructiva sigue sin ejecutarse a la primera: devuelve impacto y token.
+  - Caso 4: el token emitido para 'pruebas' NO sirve para 'otro'. El permiso
+    esta atado al objetivo, no solo a la accion.
+  - Caso 5: el token correcto deja pasar.
+  - Caso 6: el mismo token ya no vale. Un solo uso.
+
+DETALLE QUE ESTA EJECUCION DEMUESTRA Y NO ESTABA VERIFICADO:
+  Un token rechazado NO se consume. En el caso 4 se intenta usar sobre 'otro',
+  se rechaza, y en el caso 5 el mismo token sigue siendo valido para su objetivo
+  legitimo. Si un intento fallido invalidara el token, cualquier error del modelo
+  obligaria a repetir la confirmacion con el usuario, y eso empuja a la gente a
+  desactivar el mecanismo.
+
+OBSERVACION PARA EL TEXTO:
+  El impacto se imprime ANTES de que exista ninguna posibilidad de ejecutar.
+  Eso es exactamente lo que sostiene el argumento de la seccion 9.6: el token
+  no da control de acceso, da visibilidad. La frase "Se eliminara la cuenta
+  local 'pruebas'. No se puede deshacer." aparece en la conversacion pase lo
+  que pase despues.

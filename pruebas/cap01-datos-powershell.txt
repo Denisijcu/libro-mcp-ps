@@ -1,0 +1,58 @@
+Fecha   : 2026-09-04
+Maquina : HP Omen / Windows 11 build 26100 / usuario denis
+PowerShell: 5.1.26100.8972
+Ejecutado via: MCP windows / execute_powershell
+---
+
+> (Get-Command -CommandType Cmdlet,Function).Count
+1644
+
+> (Get-Command -Verb Get).Count
+470
+
+> (Get-Command -Noun Service).Count
+8
+
+> (Get-PSDrive).Name -join ', '
+Alias, C, Cert, D, Env, F, Function, G, H, HKCU, HKLM, Variable, WSMan
+
+> Get-Service -Name WinDefend | Get-Member -MemberType Property | Select-Object -ExpandProperty Name
+CanPauseAndContinue
+CanShutdown
+CanStop
+Container
+DependentServices
+DisplayName
+MachineName
+ServiceHandle
+ServiceName
+ServicesDependedOn
+ServiceType
+Site
+StartType
+Status
+
+===============================================================
+NOTAS
+===============================================================
+
+1. El conteo de 1644 cmdlets depende de los modulos instalados en la maquina.
+   En un Windows 11 recien instalado sera algo menor. En el texto se dice "en la
+   maquina donde se escribio este libro" y se invita al lector a comprobar la
+   suya, no se presenta como cifra universal.
+
+2. Las 14 propiedades de Get-Service son estables entre maquinas: vienen de la
+   clase ServiceController de .NET, no de la configuracion local.
+
+3. VERIFICADO: la salida de ConvertTo-Json citada en la seccion 1.5.
+
+   > Get-Service -Name WinDefend | Select-Object Name, Status, StartType | ConvertTo-Json
+   {
+       "Name":  "WinDefend",
+       "Status":  4,
+       "StartType":  2
+   }
+
+   Status = 4 corresponde a Running y StartType = 2 a Automatic, pero eso el
+   modelo no lo sabe: recibe los enteros. Es el ejemplo que abre el problema de
+   la serializacion de enumeraciones, que se resuelve en el capitulo 3.

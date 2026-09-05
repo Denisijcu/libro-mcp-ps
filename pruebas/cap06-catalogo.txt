@@ -1,0 +1,130 @@
+Fecha   : 2026-09-04
+Maquina : HP-OMEN / GTX 1660 Ti 6 GB
+Modelo  : google/gemma-4-12b-qat (LM Studio local)
+Comando : python banco_catalogo.py --modelo google/gemma-4-12b-qat
+---
+
+=== COSTE FIJO (sin modelo, instantaneo) ===
+
+ Herramientas   Caracteres   Tokens aprox   Factor
+            4         1348            337   1.0x
+           20         4267           1066   3.2x
+           60        11428           2857   8.5x
+           96        17788           4447   13.2x
+
+Ese texto viaja en CADA llamada.
+
+Con una ventana de contexto de 8k, el catalogo de 96 se come el 55% antes de
+que el usuario escriba nada. Con 4k, no cabe siquiera.
+
+
+=== ACIERTO SEGUN TAMANO ===
+
+--- 4 herramientas ---
+  [OK   ] hora         14.6s  get_date
+  [OK   ] defender     16.4s  get_service
+  [OK   ] disco        26.5s  get_disk_space
+  [OK   ] lenta        36.3s  get_top_processes
+  [OK   ] spooler      31.6s  get_service
+  [OK   ] sin-sitio    17.5s  get_disk_space
+
+--- 20 herramientas ---
+  [FALLO] lenta        44.8s  get_system_info
+  (el resto OK)
+
+--- 60 herramientas ---
+  [FALLO] defender     13.0s  get_defender_status
+  [FALLO] lenta        48.2s  get_system_info
+  (el resto OK)
+
+--- 96 herramientas ---
+  [FALLO] defender     14.6s  get_defender_status
+  [FALLO] lenta        57.0s  get_system_info
+  (el resto OK)
+
+ Herramientas    Acierto   Tiempo total
+            4       6/6         142.9s
+           20       5/6         150.5s
+           60       4/6         174.2s
+           96       4/6         199.6s
+
+
+===============================================================
+LECTURA
+===============================================================
+
+1. EL COSTE EN TIEMPO ES REAL Y MEDIBLE
+
+   Las mismas seis preguntas: 142.9s con 4 herramientas, 199.6s con 96.
+   Un 40% mas de espera por hacer exactamente lo mismo. El catalogo no solo
+   ocupa contexto: cuesta segundos en cada llamada.
+
+
+2. UNO DE LOS DOS "FALLOS" NO ES UN FALLO
+
+   Caso 'defender': "Esta corriendo Windows Defender?"
+     Con 4 herramientas  -> get_service (esperado)
+     Con 60 y 96         -> get_defender_status
+
+   get_defender_status NO EXISTIA en el catalogo pequeno. Cuando existe, es
+   la eleccion MEJOR: una herramienta dedicada a Defender responde esa
+   pregunta con mas precision que la generica de servicios.
+
+   El banco la marca como fallo porque yo escribi que la respuesta correcta
+   era get_service. La expectativa estaba mal, no el modelo.
+
+   Esto es un problema de diseno de la medicion, no un bug: al anadir
+   herramientas cambias cuales son las respuestas correctas. Un banco con
+   respuestas fijas no puede medir catalogos variables sin este sesgo.
+
+   Es la CUARTA vez en este libro que el instrumento culpa al modelo de algo
+   suyo (27B, marcador del diagnostico, mencion en prosa, y esto).
+
+
+3. EL OTRO SI ES DEGRADACION REAL
+
+   Caso 'lenta': "La maquina va lentisima, no se que le pasa."
+     Con 4 herramientas  -> get_top_processes (correcto)
+     Con 20, 60 y 96     -> get_system_info
+
+   Aqui no hay defensa: para un sintoma de lentitud, un resumen de identidad
+   de la maquina no ayuda. get_top_processes es claramente mejor.
+
+   Y aparece ya en 20 herramientas, que es un catalogo modesto.
+
+   Ademas es el caso INDIRECTO: el usuario describe un sintoma en vez de
+   pedir una herramienta. Es justo el tipo de peticion que mas se degrada
+   cuando hay muchas opciones plausibles, porque no hay una palabra clave
+   que ancle la eleccion.
+
+
+4. LA DEGRADACION SE ESTANCA
+
+   6/6 -> 5/6 -> 4/6 -> 4/6
+
+   De 60 a 96 no empeora. Los casos directos (hora, disco, spooler,
+   sin-sitio) aguantan los 96 sin despeinarse. Lo que se rompe son los
+   indirectos y los que tienen alternativa especifica.
+
+   O sea: el catalogo grande no vuelve tonto al modelo. Le quita precision
+   en las preguntas ambiguas, que son precisamente las que un usuario real
+   hace mas.
+
+
+5. DETALLE CURIOSO
+
+   El caso 'defender' fue MAS RAPIDO cuando fallo (13.0s y 14.6s) que cuando
+   acerto (16.4s). get_defender_status no lleva argumentos; get_service
+   exige inventar el nombre corto del servicio. Menos tokens que generar.
+
+
+===============================================================
+CORRECCION PENDIENTE DEL BANCO
+===============================================================
+
+Anadir respuestas ACEPTABLES ademas de la esperada:
+
+    ("defender", "...", "get_service", {"get_defender_status"})
+
+Asi se distingue "eligio otra cosa razonable" de "se equivoco". Sin eso, el
+banco mide mi capacidad de anticipar respuestas, no la del modelo de elegir.

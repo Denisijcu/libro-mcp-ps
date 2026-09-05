@@ -1,0 +1,79 @@
+Fecha   : 2026-09-04
+Maquina : HP Omen / Windows 11 build 26100 / usuario denis
+PowerShell: 5.1.26100.8972
+Python  : 3.14.3
+Comando : python demo_inyeccion.py
+Cwd     : F:\libro-mcp-ps\codigo\v08-inyeccion
+Version : DESPUES del arreglo del reporte de errores (EPILOGO_ERRORES en seguro.py)
+---
+Demostracion de inyeccion de comandos en un servidor MCP de PowerShell
+Carga util inofensiva: crear un archivo marcador en %TEMP%
+
+=== VERSION VULNERABLE (f-string) ===
+Valor enviado : denis'; Set-Content -Path $env:TEMP\PWNED_DEMO_CAP8.txt -Value 'inyeccion ejecutada'; '
+Salida        : Name  Enabled Description
+----  ------- -----------
+denis True
+
+{
+    "Name":  null,
+    "Enabled":  null
+}
+RESULTADO     : VULNERABLE. Se creo C:\Users\denis\AppData\Local\Temp\PWNED_DEMO_CAP8.txt
+                Contenido: inyeccion ejecutada
+
+=== VERSION SEGURA (variables de entorno) ===
+Valor enviado : denis'; Set-Content -Path $env:TEMP\PWNED_DEMO_CAP8.txt -Value 'inyeccion ejecutada'; '
+Salida        : [ERROR] PSERROR: User denis'; Set-Content -Path $env:TEMP\PWNED_DEMO_CAP8.txt -Value 'inyeccion ejecutada'; ' was not found.
+RESULTADO     : SEGURO. No se creo C:\Users\denis\AppData\Local\Temp\PWNED_DEMO_CAP8.txt
+
+=== Comprobacion de que la version segura sigue funcionando ===
+get_user_info('denis') -> {
+    "Name":  "denis",
+    "Enabled":  true
+}
+list_directory('C:\\')     -> [
+    {
+        "Name":  "inetpub"
+    },
+    {
+        "Name":  "PerfLogs"
+    },
+    {
+        "Name":  "Program Files
+search_software('Python')  -> [
+    {
+        "DisplayName":  "Python 3.12.0 Test Suite (64-bit)"
+    },
+    {
+        "DisplayName":  "Python 3.12.0
+
+--- VEREDICTO ---
+La version con f-string ejecuto codigo ajeno : True
+La version con env vars resistio             : True
+
+===============================================================
+NOTAS SOBRE ESTA EJECUCION
+===============================================================
+
+1. El arreglo del reporte de errores funciona.
+   Antes: "[ERROR] Codigo 1:" con el mensaje vacio.
+   Ahora : el mensaje real de PowerShell, recuperado de $Error[0].
+
+2. El mensaje de error ES la demostracion.
+
+     User denis'; Set-Content -Path $env:TEMP\PWNED_DEMO_CAP8.txt
+     -Value 'inyeccion ejecutada'; ' was not found.
+
+   PowerShell trato la carga util entera como un nombre de usuario. La busco
+   literal en la base de datos de cuentas locales y no la encontro. El punto y
+   coma, las comillas y el Set-Content son caracteres dentro de una cadena, no
+   sentencias. Eso es exactamente lo que se queria demostrar: el codigo se
+   convirtio en dato.
+
+3. Efecto secundario a tener en cuenta (semilla del capitulo 11).
+   El mensaje de error devuelve la carga util completa al modelo y al log. No es
+   una vulnerabilidad por si misma, pero significa que texto controlado por un
+   tercero acaba en el contexto del modelo por la via del reporte de errores.
+   En el capitulo 11 se decide si conviene truncar o marcar los valores que se
+   devuelven en los mensajes de error.

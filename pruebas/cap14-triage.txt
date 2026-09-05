@@ -1,0 +1,100 @@
+Fecha   : 2026-09-04
+Maquina : HP-OMEN / Windows 11 Home 25H2 build 26200.8973
+Python  : 3.14.3
+Cwd     : F:\libro-mcp-ps\codigo\v14-triage
+Comando : python triage.py --autoprueba
+---
+
+=== RONDA 1: tabla de reglas original ===
+
+[FALLA] maquina-limpia-desarrollo
+         esperado VERDE, obtenido AMARILLO (19 puntos, confianza alta)
+             8 pts  proceso_ruta_usuario x1
+             6 pts  puerto_expuesto x2
+             5 pts  proceso_sin_firma x15  [TOPADO]
+[PASA ] sospechoso-un-indicio   (17 puntos)
+[PASA ] comprometido            (62 puntos)
+[PASA ] verde-poco-fiable       (4 puntos, confianza baja)
+1 FALLO(S)
+
+DIAGNOSTICO:
+  El fallo era de la tabla, no de la expectativa. Una maquina de trabajo sana
+  en AMARILLO permanente es el fallo que el capitulo 13 advierte: la alarma
+  que suena todos los dias acaba ignorada.
+
+  Dos pesos mal puestos, por la misma razon:
+    - puerto_expuesto = 3: cualquier maquina de desarrollo tiene varios
+      servicios en 0.0.0.0 de forma rutinaria.
+    - proceso_ruta_usuario = 8: un ejecutable en AppData es normal en
+      cualquier Windows de consumo (Discord, Slack, VS Code, Teams, Electron).
+
+  Pero bajarlos a secas dejaba un agujero: un binario sin firmar + en AppData +
+  con base64 sumaba 1+3+15 = 19, amarillo flojo, y eso si es sospechoso.
+
+  El problema de fondo: sumar trata cada indicador como independiente y no lo
+  son. Tres senales debiles repartidas entre veinte procesos son ruido. Las
+  mismas tres sobre UN proceso son un patron.
+
+
+=== CAMBIOS APLICADOS ===
+
+  proceso_ruta_usuario : 8 -> 3   (tope 24 -> 12)
+  puerto_expuesto      : 3 -> 1   (tope 12 -> 4)
+  combinacion          : NUEVA, 20 puntos, tope 40
+  Escenario nuevo      : "indicadores-que-coinciden"
+
+
+=== RONDA 2: con la regla de combinacion ===
+
+[PASA ] maquina-limpia-desarrollo
+         esperado VERDE, obtenido VERDE (10 puntos, confianza alta)
+             5 pts  proceso_sin_firma x15  [TOPADO]
+             3 pts  proceso_ruta_usuario x1
+             2 pts  puerto_expuesto x2
+         lectura: Sin indicadores relevantes en las comprobaciones realizadas.
+
+[PASA ] indicadores-que-coinciden
+         esperado AMARILLO, obtenido AMARILLO (39 puntos, confianza alta)
+            20 pts  combinacion x1
+            15 pts  cmdline_sospechosa x1
+             3 pts  proceso_ruta_usuario x1
+             1 pts  proceso_sin_firma x1
+
+[PASA ] sospechoso-un-indicio
+         esperado AMARILLO, obtenido AMARILLO (17 puntos, confianza alta)
+            12 pts  tarea_sospechosa x1
+             5 pts  proceso_sin_firma x8  [TOPADO]
+
+[PASA ] comprometido
+         esperado ROJO, obtenido ROJO (62 puntos, confianza alta)
+            20 pts  conexion_alta x1
+            15 pts  persistencia_sospechosa x1
+            15 pts  cmdline_sospechosa x1
+            12 pts  exclusion_defender x1
+
+[PASA ] verde-poco-fiable
+         esperado VERDE, obtenido VERDE (4 puntos, confianza baja)
+             4 pts  proceso_sin_firma x4
+         huecos: 3
+         lectura: Sin indicadores relevantes en las comprobaciones realizadas.
+                  Ojo: 3 comprobacion(es) no se pudieron hacer, asi que este
+                  verde es parcial.
+
+TODO CORRECTO
+
+
+=== LO QUE DEMUESTRA LA COMPARACION ===
+
+Los mismos tipos de indicador dan 10 puntos si estan repartidos y 39 si
+coinciden sobre el mismo artefacto. Esa es la diferencia entre ruido de fondo
+y patron, y es la que una suma plana no puede expresar.
+
+Separacion entre escenarios en la ronda 2:
+    limpio            10
+    amarillo flojo    17
+    amarillo fuerte   39
+    comprometido      62
+
+Los umbrales (15 y 45) caen en huecos anchos entre grupos, no pegados a
+ningun escenario. Eso significa que pequenos cambios en el conteo no cambian
+el veredicto, que es lo que se busca en un sistema de este tipo.

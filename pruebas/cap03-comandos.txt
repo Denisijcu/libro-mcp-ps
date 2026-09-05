@@ -1,0 +1,63 @@
+Fecha   : 2026-09-04
+Maquina : HP Omen / Windows 11 build 26100 / usuario denis
+PowerShell: 5.1.26100.8972
+Ejecutado via: MCP windows / execute_powershell
+---
+
+=== PROBLEMA 1: las enumeraciones se serializan como enteros ===
+
+> Get-Service -Name WinDefend | Select-Object Name, Status, StartType | ConvertTo-Json
+{
+    "Name":  "WinDefend",
+    "Status":  4,
+    "StartType":  2
+}
+
+Correcto pero inutil para el modelo: recibe 4 y 2 sin forma de saber que
+significan.
+
+=== PROBLEMA 1, ARREGLADO ===
+
+> Get-Service -Name WinDefend |
+    Select-Object Name,
+                  @{N='Status';E={$_.Status.ToString()}},
+                  @{N='StartType';E={$_.StartType.ToString()}} |
+    ConvertTo-Json
+{
+    "Name":  "WinDefend",
+    "Status":  "Running",
+    "StartType":  "Automatic"
+}
+
+=== PROBLEMA 2: un elemento devuelve objeto, varios devuelven array ===
+
+> Get-Service -Name WinDefend | Select-Object Name | ConvertTo-Json
+{
+    "Name":  "WinDefend"
+}
+
+> ConvertTo-Json -InputObject @(Get-Service -Name WinDefend | Select-Object Name)
+[
+    {
+        "Name":  "WinDefend"
+    }
+]
+
+Sin el @(), la forma del JSON cambia segun cuantos resultados haya. Con un solo
+resultado sale un objeto; con dos o mas, un array. El modelo tiene que adivinar
+la estructura en cada llamada. Envolviendo en @() la salida es siempre un array.
+
+===============================================================
+NOTAS
+===============================================================
+
+- Status = 4 es Running y StartType = 2 es Automatic. Son valores de las
+  enumeraciones ServiceControllerStatus y ServiceStartMode de .NET. Estables
+  entre maquinas, pero irrelevante: el punto es que el modelo no los conoce.
+
+- La sintaxis @{N='Nombre';E={expresion}} es una "propiedad calculada" de
+  Select-Object. N es Name y E es Expression, abreviados. Dentro de E, $_ es el
+  objeto que viene por el pipeline.
+
+- PENDIENTE [VERIFICAR: Denis]: cargar paso2_servidor.py en Claude Desktop y
+  comprobar que las cuatro herramientas aparecen y responden.

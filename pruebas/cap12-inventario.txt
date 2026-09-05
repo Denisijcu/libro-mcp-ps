@@ -1,0 +1,79 @@
+Fecha   : 2026-09-04
+Maquina : HP Omen / usuario denis
+Ejecutado via: MCP windows / execute_powershell (proceso hijo del servidor MCP)
+---
+
+=== HALLAZGO 1: el build de PowerShell NO es el build de Windows ===
+
+> $k = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
+ProductName    : Windows 10 Home
+DisplayVersion : 25H2
+CurrentBuild   : 26200
+UBR            : 8973
+BuildCompleto  : 26200.8973
+
+> $PSVersionTable.PSVersion
+5.1.26100.8972
+
+El build del SO es 26200.8973. El de PowerShell es 26100.8972. Son parecidos
+porque se compilan juntos y NO son lo mismo. Durante las primeras sesiones se
+anoto 26100 como build de Windows en los capitulos 1, 3 y 8. Corregido.
+
+
+=== HALLAZGO 2: el registro miente sobre la version de Windows ===
+
+Registro : ProductName = "Windows 10 Home"
+CIM      : (Get-CimInstance Win32_OperatingSystem).Caption = "Microsoft Windows 11 Home"
+
+La maquina es Windows 11. La clave ProductName del registro nunca se actualizo
+en el salto a Windows 11 y sigue diciendo "Windows 10". Es un comportamiento
+conocido de Microsoft, no un problema de esta maquina.
+
+Consecuencia para el libro: una herramienta de inventario que lea ProductName
+del registro devuelve un dato FALSO con toda seguridad aparente. Hay que usar
+Win32_OperatingSystem.Caption para el nombre y el registro solo para
+DisplayVersion (25H2) y el build.
+
+
+=== HALLAZGO 3: $env:COMPUTERNAME viene vacio en el proceso del servidor ===
+
+> "COMPUTERNAME   : [$env:COMPUTERNAME]"
+COMPUTERNAME   : []
+
+> (Get-CimInstance Win32_ComputerSystem).Name
+HP-OMEN
+
+> [System.Net.Dns]::GetHostName()
+HP-Omen
+
+En una consola interactiva $env:COMPUTERNAME funciona. En el proceso lanzado
+por el servidor MCP, no: la variable no esta en el entorno heredado.
+
+Consecuencia: el entorno del proceso del servidor NO es el de tu consola. Las
+herramientas no pueden depender de variables de entorno para obtener datos del
+sistema. Hay que usar CIM o .NET.
+
+Nota menor: CIM devuelve HP-OMEN y .NET devuelve HP-Omen. Diferencia solo de
+mayusculas, pero conviene elegir una fuente y no mezclarlas.
+
+
+=== HALLAZGO 4: ConvertTo-Json destroza las fechas ===
+
+> $os = Get-CimInstance Win32_OperatingSystem
+> [PSCustomObject]@{ UltimoArranque = $os.LastBootUpTime } | ConvertTo-Json
+{
+    "UltimoArranque":  "\/Date(1787697380711)\/"
+}
+
+PowerShell 5.1 serializa DateTime con el formato de fecha heredado de
+Microsoft JSON: milisegundos desde epoch envueltos en /Date(...)/. Un modelo
+que recibe eso no puede leer la fecha.
+
+Es el mismo problema que "Status": 4 del capitulo 3, y es peor, porque las
+fechas estan en todas partes en trabajo forense: hora de eventos, timestamps
+de archivos, ultimo arranque, ultimo acceso de una cuenta.
+
+Arreglo: convertir a texto con formato explicito antes de serializar.
+  @{N='UltimoArranque';E={$_.LastBootUpTime.ToString('yyyy-MM-dd HH:mm:ss')}}
+
+PENDIENTE [VERIFICAR: Denis]: comprobar la salida con el arreglo aplicado.
