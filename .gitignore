@@ -18,6 +18,11 @@ manuscrito/
 # Notas internas de trabajo: plan, bitacora, bloqueadores.
 PLAN.md
 
+# Material comercial: descripcion de KDP, palabras clave, precios,
+# ganchos de marketing. No pinta nada en un repositorio de codigo.
+kdp-ficha.md
+kdp-*.md
+
 # La portada es un activo con derechos. Fuera.
 assets/portada.jpg
 assets/portada.png
@@ -40,6 +45,7 @@ secrets.json
 # no de archivos. Si algun dia creas uno, que caiga aqui.
 claves.txt
 api_keys.txt
+kdp-ficha.md
 
 # -------------------------------------------------------------
 #  SALIDAS DE EJECUCION
