@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Informe HP-OMEN 2026-09-07 08:10:15</title>
+<style>
+* { box-sizing: border-box; }
+body { margin:0; background:#f7f8fa; color:#1c2330;
+  font-family: "Segoe UI", system-ui, sans-serif; line-height:1.5; }
+main { max-width: 980px; margin: 0 auto; padding: 32px 20px 60px; }
+header h1 { margin:0; font-size:1.9rem; letter-spacing:-.01em; }
+.sub { margin:.25rem 0 0; color:#6b7684; }
+h2 { font-size:1.05rem; text-transform:uppercase; letter-spacing:.06em;
+  color:#6b7684; margin:2.2rem 0 .8rem; }
+h3 { font-size:.95rem; margin:0 0 .6rem; }
+section.veredicto { display:flex; align-items:center; gap:16px; margin-top:20px;
+  padding:16px 20px; background:#fff; border-left:6px solid; border-radius:6px; }
+.sem { width:34px; height:34px; border-radius:50%; flex:none; }
+.sem-txt { font-size:1.4rem; font-weight:700; line-height:1; }
+.sem-pts { color:#6b7684; font-size:.9rem; }
+.tarjetas { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
+.tarjeta { background:#fff; border:1px solid #d8dde5; border-radius:6px; padding:12px 14px; }
+.tarjeta-etq { font-size:.75rem; text-transform:uppercase; letter-spacing:.05em;
+  color:#6b7684; }
+.tarjeta-val { font-size:1.25rem; font-weight:600; margin-top:2px; }
+.tarjeta-nota { font-size:.8rem; color:#6b7684; }
+.dos-columnas { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+@media (max-width:720px) { .dos-columnas { grid-template-columns:1fr; } }
+.grafico { background:#fff; border:1px solid #d8dde5; border-radius:6px; padding:14px 16px; }
+.dona-fila { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+.leyenda { list-style:none; margin:0; padding:0; font-size:.9rem; }
+.leyenda li { margin:.25rem 0; }
+.punto { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; }
+.pct { color:#6b7684; }
+.medidor { background:#fff; border:1px solid #d8dde5; border-radius:6px;
+  padding:12px 14px; margin-bottom:10px; }
+.medidor-cab { display:flex; justify-content:space-between; font-size:.9rem; margin-bottom:6px; }
+.barra-pista { display:block; background:#e9edf3; border-radius:4px; height:9px; overflow:hidden; }
+.barra-relleno { display:block; height:100%; background:#2f6fb0; }
+.barra-fila { display:grid; grid-template-columns:130px 1fr 70px; align-items:center;
+  gap:8px; font-size:.85rem; margin:.35rem 0; }
+.barra-etq { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.barra-val { text-align:right; color:#6b7684; }
+.hallazgos { margin:0; padding-left:1.1rem; }
+.hallazgos li { margin:.3rem 0; }
+.aviso { background:#fff8e1; border:1px solid #d99a00; border-radius:6px;
+  padding:12px 16px; margin-top:16px; font-size:.9rem; }
+.vacio { color:#6b7684; font-style:italic; }
+footer { margin-top:3rem; padding-top:1rem; border-top:1px solid #d8dde5;
+  color:#6b7684; font-size:.8rem; }
+@media print { body { background:#fff; } section { break-inside: avoid; } }
+</style>
+</head>
+<body>
+<main>
+<header><h1>Informe de estado</h1><p class="sub">HP-OMEN &middot; 2026-09-07 08:10:15</p></header>
+<section class="veredicto" style="border-color:#1f9d55"><div class="sem" style="background:#1f9d55"></div><div><div class="sem-txt" style="color:#1f9d55">VERDE</div><div class="sem-pts">Puntuacion de riesgo: 10</div></div></section>
+<section><h2>Hallazgos</h2><ul class="hallazgos"><li>Instalación reciente de herramientas de desarrollo (Python, VS Code, Pandoc) y drivers de NVIDIA. Presencia de Tailscale para redes privadas.</li></ul></section>
+<section><h2>Sistema</h2><div class="tarjetas"><div class="tarjeta"><div class="tarjeta-etq">Sistema operativo</div><div class="tarjeta-val">Microsoft Windows 11 Home 25H2</div></div><div class="tarjeta"><div class="tarjeta-etq">Compilacion</div><div class="tarjeta-val">26200.8973</div></div><div class="tarjeta"><div class="tarjeta-etq">Equipo</div><div class="tarjeta-val">HP OMEN by HP Obelisk Desktop 875-0xxx</div></div><div class="tarjeta"><div class="tarjeta-etq">Memoria fisica</div><div class="tarjeta-val">31.9 GB</div></div><div class="tarjeta"><div class="tarjeta-etq">En dominio</div><div class="tarjeta-val">No</div></div><div class="tarjeta"><div class="tarjeta-etq">Tiempo encendido</div><div class="tarjeta-val">301.6 h</div><div class="tarjeta-nota">desde 2026-08-25 18:36:20</div></div></div></section>
+<section><h2>Recursos</h2><div class="dos-columnas"><div><div class="medidor"><div class="medidor-cab"><span>Memoria  (23.76 de 31.86 GB)</span><b style="color:#d99a00">75%</b></div><div class="barra-pista"><span class="barra-relleno" style="width:74.6%;background:#d99a00"></span></div></div><div class="medidor"><div class="medidor-cab"><span>Disco C:  (36.3 GB libres)</span><b style="color:#d99a00">85%</b></div><div class="barra-pista"><span class="barra-relleno" style="width:84.7%;background:#d99a00"></span></div></div><div class="medidor"><div class="medidor-cab"><span>Disco D:  (32.5 GB libres)</span><b style="color:#d99a00">78%</b></div><div class="barra-pista"><span class="barra-relleno" style="width:78.2%;background:#d99a00"></span></div></div><div class="medidor"><div class="medidor-cab"><span>Disco F:  (91.7 GB libres)</span><b style="color:#d99a00">85%</b></div><div class="barra-pista"><span class="barra-relleno" style="width:85.4%;background:#d99a00"></span></div></div><div class="medidor"><div class="medidor-cab"><span>Disco G:  (7.2 GB libres)</span><b style="color:#d99a00">85%</b></div><div class="barra-pista"><span class="barra-relleno" style="width:85.2%;background:#d99a00"></span></div></div><div class="medidor"><div class="medidor-cab"><span>Disco H:  (14.1 GB libres)</span><b style="color:#1f9d55">31%</b></div><div class="barra-pista"><span class="barra-relleno" style="width:30.6%;background:#1f9d55"></span></div></div></div><div><div class="grafico"><h3>Procesos por memoria</h3><div class="barra-fila"><span class="barra-etq">llama-server</span><span class="barra-pista"><span class="barra-relleno" style="width:100.0%"></span></span><span class="barra-val">6385 MB</span></div><div class="barra-fila"><span class="barra-etq">Memory Compression</span><span class="barra-pista"><span class="barra-relleno" style="width:59.0%"></span></span><span class="barra-val">3766 MB</span></div><div class="barra-fila"><span class="barra-etq">vmmemWSL</span><span class="barra-pista"><span class="barra-relleno" style="width:22.4%"></span></span><span class="barra-val">1431 MB</span></div><div class="barra-fila"><span class="barra-etq">Code</span><span class="barra-pista"><span class="barra-relleno" style="width:8.6%"></span></span><span class="barra-val">551 MB</span></div><div class="barra-fila"><span class="barra-etq">Code</span><span class="barra-pista"><span class="barra-relleno" style="width:8.2%"></span></span><span class="barra-val">524 MB</span></div><div class="barra-fila"><span class="barra-etq">Code</span><span class="barra-pista"><span class="barra-relleno" style="width:5.8%"></span></span><span class="barra-val">372 MB</span></div><div class="barra-fila"><span class="barra-etq">LM Studio</span><span class="barra-pista"><span class="barra-relleno" style="width:5.7%"></span></span><span class="barra-val">361 MB</span></div><div class="barra-fila"><span class="barra-etq">Code</span><span class="barra-pista"><span class="barra-relleno" style="width:5.6%"></span></span><span class="barra-val">357 MB</span></div></div></div></div></section>
+<section><h2>Postura de seguridad</h2><div class="tarjetas"><div class="tarjeta"><div class="tarjeta-etq">Proteccion en tiempo real</div><div class="tarjeta-val" style="color:#1f9d55">Si</div></div><div class="tarjeta"><div class="tarjeta-etq">Proteccion antimanipulacion</div><div class="tarjeta-val" style="color:#1f9d55">Si</div></div><div class="tarjeta"><div class="tarjeta-etq">Control de cuentas (UAC)</div><div class="tarjeta-val" style="color:#1f9d55">Si</div></div><div class="tarjeta"><div class="tarjeta-etq">Perfiles de firewall activos</div><div class="tarjeta-val" style="color:#1f9d55">3 de 3</div></div><div class="tarjeta"><div class="tarjeta-etq">Exclusiones del antivirus</div><div class="tarjeta-val" style="color:#d99a00">11</div><div class="tarjeta-nota">revisar una por una</div></div><div class="tarjeta"><div class="tarjeta-etq">Antiguedad de las firmas</div><div class="tarjeta-val" style="color:#1f9d55">1 dias</div></div></div></section>
+<section><h2>Red y arranque automatico</h2><div class="dos-columnas"><div><div class="grafico">
+  <h3>Conexiones establecidas</h3>
+  <div class="dona-fila">
+    <svg viewBox="0 0 220 220" width="200" height="200" role="img">
+      <path d="M 110 110 L 110.0 15.0 A 95 95 0 1 1 86.06208416841308 201.93462995868236 Z" fill="#2f6fb0" stroke="#fff" stroke-width="2"/><path d="M 110 110 L 86.06208416841308 201.93462995868236 A 95 95 0 0 1 109.99999999999999 15.0 Z" fill="#d99a00" stroke="#fff" stroke-width="2"/>
+      <circle cx="110" cy="110" r="52" fill="#f7f8fa"/>
+      <text x="110" y="116" text-anchor="middle" font-size="26" fill="#1c2330">37</text>
+    </svg>
+    <ul class="leyenda"><li><span class="punto" style="background:#2f6fb0"></span>A red privada <b>20</b> <span class="pct">54%</span></li><li><span class="punto" style="background:#d99a00"></span>A red publica <b>17</b> <span class="pct">46%</span></li></ul>
+  </div>
+</div><div class="tarjeta"><div class="tarjeta-etq">Puertos expuestos a la red</div><div class="tarjeta-val" style="color:#d99a00">17</div><div class="tarjeta-nota">escuchando en 0.0.0.0</div></div></div><div><div class="grafico"><h3>Superficie de arranque</h3><div class="barra-fila"><span class="barra-etq">Claves de arranque</span><span class="barra-pista"><span class="barra-relleno" style="width:6.0%"></span></span><span class="barra-val">8</span></div><div class="barra-fila"><span class="barra-etq">Tareas no-Microsoft</span><span class="barra-pista"><span class="barra-relleno" style="width:16.4%"></span></span><span class="barra-val">22</span></div><div class="barra-fila"><span class="barra-etq">Servicios activos</span><span class="barra-pista"><span class="barra-relleno" style="width:100.0%"></span></span><span class="barra-val">134</span></div></div></div></div></section>
+<footer>Generado por el servidor MCP de PowerShell. Los datos proceden de una sola lectura del sistema en la fecha indicada. Este informe no sustituye a un analisis forense.</footer>
+</main>
+</body>
+</html>
