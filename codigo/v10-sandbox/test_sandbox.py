@@ -51,7 +51,7 @@ CASOS = [
 
     # --- deben bloquearse: reglas generales ---
     ("Raiz del disco",
-     r"C:\", True),
+     r"C:\\", True),
     ("Carpeta de primer nivel",
      r"C:\algo", True),
     ("Comodin en la ruta",

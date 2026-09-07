@@ -108,6 +108,65 @@ hay publicados tienen un problema serio. La carga útil es inofensiva y se limpi
 }
 ```
 
+## A la pregunta: "Cuales son las preguntas que te puedo hacer de la herramienta powershell-inventario que tienes instalada?"
+
+Respuesta del modelo: (Gemma)
+
+Como asistente, tengo acceso a una serie de herramientas específicas diseñadas para interactuar con el sistema operativo Windows y obtener información detallada. Aunque no tengo una herramienta llamada exactamente "powershell-inventario", el conjunto de herramientas que tengo a mi disposición cumple precisamente esa función de **inventario y diagnóstico del sistema**.
+
+Aquí tienes todas las categorías de preguntas que puedes hacerme basadas en las capacidades de estas herramientas:
+
+### 1. Información General del Sistema
+Puedes preguntarme sobre la identidad y el estado actual de la máquina:
+*   "¿Qué sistema operativo y versión tiene esta computadora?"
+*   "¿Cuál es el nombre del equipo y la arquitectura (64 o 32 bits)?"
+*   "¿Cuánto tiempo lleva encendida la computadora?"
+*   "¿A qué dominio pertenece esta máquina?"
+
+### 2. Recursos de Hardware (Memoria y Disco)
+Puedes preguntarme sobre el rendimiento y el espacio disponible:
+*   "¿Cuánta memoria RAM total tiene y cuánta está libre?"
+*   "¿Qué porcentaje de la RAM está en uso?"
+*   "¿Cuánto espacio libre hay en cada unidad de disco (C:, D:, etc.)?"
+*   "¿Se está quedando sin espacio en el disco duro?"
+
+### 3. Rendimiento y Procesos
+Si sientes que la computadora está lenta, puedes preguntarme:
+*   "¿Qué programas están consumiendo más memoria en este momento?"
+*   "¿Qué procesos están usando más CPU?"
+*   "¿Cuál es el PID y el usuario del proceso que está ralentizando el equipo?"
+
+### 4. Software e Instalaciones
+Puedes preguntarme sobre lo que tienes instalado:
+*   "¿Qué programas tengo instalados en esta máquina?"
+*   "¿Tengo instalada la versión más reciente de [nombre del programa]?"
+*   "¿Quién es el editor de [nombre del programa] y cuándo se instaló?"
+*   "Dame una lista de los últimos programas instalados."
+
+### 5. Red y Conectividad
+Para diagnosticar problemas de internet o red local:
+*   "¿Cuál es mi dirección IP actual?"
+*   "¿Cuál es la puerta de enlace (gateway) y los servidores DNS?"
+*   "¿Qué adaptadores de red están activos?"
+
+### 6. Servicios y Actualizaciones
+Para mantenimiento técnico:
+*   "¿Qué servicios de Windows están corriendo en este momento?"
+*   "¿Está corriendo el servicio de [nombre del servicio]?"
+*   "¿Cuáles fueron las últimas actualizaciones de Windows instaladas?"
+*   "¿Hay algún reinicio pendiente por una actualización?"
+
+---
+
+**¿Cómo pedirme las cosas?**
+Puedes ser directo. Por ejemplo:
+*   *"Hazme un inventario rápido de hardware y memoria."*
+*   *"Dime qué programas tengo instalados que tengan que ver con 'Adobe'."*
+*   *"¿Por qué la PC está lenta? Muéstrame los procesos que más consumen."*
+*   *"Dame los detalles de mi conexión de red."*
+
+**¿Hay algo específico que quieras saber ahora mismo?**
+
 Ruta absoluta al intérprete concreto, no `"python"` a secas, y barras dobladas. El
 capítulo 16 explica por qué eso se lleva la mitad de las horas perdidas de todo el mundo.
 
