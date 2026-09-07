@@ -108,7 +108,7 @@ hay publicados tienen un problema serio. La carga útil es inofensiva y se limpi
 }
 ```
 
-## A la pregunta: "Cuales son las preguntas que te puedo hacer de la herramienta powershell-inventario que tienes instalada?"
+## A la pregunta: "Cuáles son las preguntas que te puedo hacer de la herramienta PowerShell Inventario que tienes instalada?"
 
 Respuesta del modelo: (Gemma)
 
@@ -165,7 +165,8 @@ Puedes ser directo. Por ejemplo:
 *   *"¿Por qué la PC está lenta? Muéstrame los procesos que más consumen."*
 *   *"Dame los detalles de mi conexión de red."*
 
-**¿Hay algo específico que quieras saber ahora mismo?**
+
+---
 
 Ruta absoluta al intérprete concreto, no `"python"` a secas, y barras dobladas. El
 capítulo 16 explica por qué eso se lleva la mitad de las horas perdidas de todo el mundo.
