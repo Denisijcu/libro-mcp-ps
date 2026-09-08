@@ -6,6 +6,8 @@ propio MCP para administrar y defender Windows 11*, de Denis Sánchez Leyva.
 No contiene el texto del libro, que está a la venta en Amazon. Aquí está todo lo que se
 construye en sus páginas, listo para clonar y ejecutar.
 
+**Video de presentación:** https://youtu.be/lXGKJB8ry2o
+
 ## Qué es esto
 
 Un servidor MCP (Model Context Protocol) que le da a un modelo de lenguaje acceso
