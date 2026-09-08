@@ -267,6 +267,102 @@ $svc = @(Get-Service | Where-Object { $_.Status -eq 'Running' }).Count
 
 
 # ==================================================================
+# PUNTUACION
+# ------------------------------------------------------------------
+# Las reglas del capitulo 14, aplicadas a los datos que ya recogimos.
+#
+# Esto NO estaba en la primera version de este modulo: generate_report
+# recibia el semaforo y la puntuacion como parametros y se fiaba de lo
+# que le pasara el modelo. Al probarlo contra una maquina real, el
+# informe salio VERDE con 11 exclusiones de Defender, que segun las
+# reglas del capitulo 14 son 36 puntos y AMARILLO.
+#
+# Es el error que el propio capitulo 14 advierte, cometido aqui: dejarle
+# el veredicto al modelo lo hace irreproducible. El numero lo calcula el
+# codigo; el modelo aporta contexto.
+# ==================================================================
+
+REGLAS = {
+    "defender_apagado":   {"puntos": 35, "tope": 35},
+    "exclusion_defender": {"puntos": 12, "tope": 36},
+    "firewall_parcial":   {"puntos": 15, "tope": 30},
+    "uac_desactivado":    {"puntos": 15, "tope": 15},
+    "firmas_viejas":      {"puntos": 8,  "tope": 16},
+    "puerto_expuesto":    {"puntos": 1,  "tope": 4},
+}
+
+UMBRAL_AMARILLO = 15
+UMBRAL_ROJO = 45
+
+
+def puntuar(datos: Dict[str, Any]) -> Dict[str, Any]:
+    """Calcula el semaforo a partir de los datos, no de lo que diga nadie."""
+    seg = datos.get("seguridad") or {}
+    red = datos.get("red") or {}
+
+    conteo: Dict[str, int] = {}
+    motivos: List[str] = []
+
+    if seg.get("TiempoReal") is False:
+        conteo["defender_apagado"] = 1
+        motivos.append("La proteccion en tiempo real de Defender esta desactivada.")
+
+    exclusiones = int(seg.get("Exclusiones") or 0)
+    if exclusiones:
+        conteo["exclusion_defender"] = exclusiones
+        motivos.append(
+            f"Hay {exclusiones} exclusion(es) en el antivirus. Cada una es una "
+            "carpeta o un proceso que Defender no mira. Revisalas una por una: "
+            "las que no reconozcas son indicador fuerte."
+        )
+
+    perfiles = seg.get("PerfilesFwOn")
+    if perfiles is not None and int(perfiles) < 3:
+        conteo["firewall_parcial"] = 3 - int(perfiles)
+        motivos.append(f"Solo {perfiles} de los 3 perfiles de firewall estan activos.")
+
+    if seg.get("UAC") is False:
+        conteo["uac_desactivado"] = 1
+        motivos.append("El control de cuentas de usuario (UAC) esta desactivado.")
+
+    edad = seg.get("EdadFirmasDias")
+    if edad is not None and int(edad) > 7:
+        conteo["firmas_viejas"] = 1
+        motivos.append(f"Las firmas del antivirus tienen {edad} dias.")
+
+    expuestos = int(red.get("ExpuestosRed") or 0)
+    if expuestos:
+        conteo["puerto_expuesto"] = expuestos
+        motivos.append(
+            f"{expuestos} puerto(s) escuchando en 0.0.0.0, alcanzables desde tu red. "
+            "Superficie de ataque, no compromiso: comprueba que los abriste tu."
+        )
+
+    desglose, total = [], 0
+    for regla, veces in conteo.items():
+        cfg = REGLAS[regla]
+        crudo = cfg["puntos"] * veces
+        aplicado = min(crudo, cfg["tope"])
+        total += aplicado
+        desglose.append({"regla": regla, "veces": veces,
+                         "puntos": aplicado, "topado": crudo > aplicado})
+
+    if total >= UMBRAL_ROJO:
+        semaforo = "ROJO"
+    elif total >= UMBRAL_AMARILLO:
+        semaforo = "AMARILLO"
+    else:
+        semaforo = "VERDE"
+
+    huecos = datos.get("errores") or []
+    confianza = "alta" if not huecos else ("media" if len(huecos) <= 2 else "baja")
+
+    return {"semaforo": semaforo, "puntuacion": total, "confianza": confianza,
+            "desglose": sorted(desglose, key=lambda d: -d["puntos"]),
+            "motivos": motivos, "huecos": huecos}
+
+
+# ==================================================================
 # COMPOSICION DEL INFORME
 # ==================================================================
 
@@ -279,7 +375,8 @@ def _tarjeta(etiqueta: str, valor: Any, nota: str = "", color: str = "") -> str:
 
 
 def componer(datos: Dict[str, Any], semaforo: str = "VERDE",
-             puntuacion: int = 0, hallazgos: Optional[List[str]] = None) -> str:
+             puntuacion: int = 0, hallazgos: Optional[List[str]] = None,
+             confianza: str = "alta") -> str:
     sis = datos.get("sistema") or {}
     mem = datos.get("memoria") or {}
     seg = datos.get("seguridad") or {}
@@ -299,7 +396,8 @@ def componer(datos: Dict[str, Any], semaforo: str = "VERDE",
         f'<section class="veredicto" style="border-color:{color_sem}">'
         f'<div class="sem" style="background:{color_sem}"></div>'
         f'<div><div class="sem-txt" style="color:{color_sem}">{semaforo}</div>'
-        f'<div class="sem-pts">Puntuacion de riesgo: {puntuacion}</div></div></section>',
+        f'<div class="sem-pts">Puntuacion de riesgo: {puntuacion} '
+        f'&middot; confianza {html.escape(confianza)}</div></div></section>',
     ]
 
     if hallazgos:
@@ -478,29 +576,30 @@ footer {{ margin-top:3rem; padding-top:1rem; border-top:1px solid {COLOR_LINEA};
 # ==================================================================
 
 @mcp.tool()
-def generate_report(semaforo: str = "VERDE", puntuacion: int = 0,
-                    hallazgos: str = "") -> str:
+def generate_report(contexto: str = "") -> str:
     """Generates a complete HTML dashboard report of this machine and saves it to disk.
 
     Collects system identity, memory and disk usage, top processes, security posture,
-    network connections and automatic start points, and renders them as charts in a
-    single self-contained HTML file that works offline.
+    network connections and automatic start points, renders them as charts in a single
+    self-contained HTML file that works offline, and computes the risk verdict itself.
 
-    Call the triage tools FIRST, then pass their verdict here: semaforo must be VERDE,
-    AMARILLO or ROJO, puntuacion is the risk score, and hallazgos is a list of findings
-    separated by ' | '. The report shows whatever you pass; it does not decide the
-    verdict itself.
+    You do NOT pass the verdict: the score is calculated from the collected data using
+    fixed rules, so two runs on the same machine always agree. Use 'contexto' only to add
+    what the code cannot know - what the user told you they installed, why a finding is
+    expected, what they were investigating.
 
-    Returns the path of the generated file. Tell the user where it is and summarise the
-    three most important things it contains.
+    Returns the report path and the computed verdict. Tell the user where the file is and
+    explain the two or three findings that weigh most.
     """
-    if semaforo not in SEMAFORO:
-        return "[ERROR] semaforo debe ser VERDE, AMARILLO o ROJO."
-
     datos = recoger()
-    lista = [h.strip() for h in hallazgos.split("|") if h.strip()]
+    veredicto = puntuar(datos)
 
-    documento = componer(datos, semaforo, limitar(puntuacion, 0, 999), lista)
+    hallazgos = list(veredicto["motivos"])
+    if contexto.strip():
+        hallazgos.append(f"Contexto aportado: {contexto.strip()}")
+
+    documento = componer(datos, veredicto["semaforo"], veredicto["puntuacion"],
+                         hallazgos, veredicto["confianza"])
 
     CARPETA_INFORMES.mkdir(parents=True, exist_ok=True)
     equipo = (datos.get("sistema") or {}).get("Equipo", "equipo")
@@ -511,10 +610,13 @@ def generate_report(semaforo: str = "VERDE", puntuacion: int = 0,
     return json.dumps({
         "archivo": str(destino),
         "tamano_kb": round(destino.stat().st_size / 1024, 1),
-        "semaforo": semaforo,
-        "secciones": ["Sistema", "Recursos", "Postura de seguridad", "Red y arranque"],
-        "comprobaciones_fallidas": datos.get("errores", []),
-        "nota": "Archivo autocontenido: se abre sin conexion a internet.",
+        "semaforo": veredicto["semaforo"],
+        "puntuacion": veredicto["puntuacion"],
+        "confianza": veredicto["confianza"],
+        "desglose": veredicto["desglose"],
+        "comprobaciones_fallidas": veredicto["huecos"],
+        "nota": "Archivo autocontenido: se abre sin conexion a internet. "
+                "La puntuacion la calcula el servidor con reglas fijas.",
     }, ensure_ascii=False, indent=2)
 
 

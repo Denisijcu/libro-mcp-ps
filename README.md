@@ -168,6 +168,52 @@ Puedes ser directo. Por ejemplo:
 
 ---
 
+---
+Como asistente con acceso a herramientas especializadas en ciberseguridad y análisis de sistemas, puedo ayudarte a realizar una investigación técnica profunda en una máquina Windows. 
+
+Aquí tienes las categorías de preguntas y tareas que puedes pedirme, divididas por el tipo de análisis que necesites realizar:
+
+### 1. Información del Sistema y Recursos
+Puedes preguntarme sobre el estado general de la máquina:
+*   **Identidad del equipo:** "¿Qué sistema operativo tiene esta máquina, qué arquitectura es y cuánto tiempo lleva encendida?"
+*   **Rendimiento:** "¿Qué procesos están consumiendo más CPU o memoria en este momento?"
+*   **Almacenamiento:** "¿Cuánto espacio libre queda en los discos duros?"
+*   **Software:** "¿Qué programas están instalados en el equipo?" o "¿Qué versión de [software específico] tengo?"
+
+### 2. Seguridad y Persistencia (Detección de Malware/Intrusos)
+Estas preguntas son clave para saber si la máquina está comprometida:
+*   **Ejecución automática:** "¿Qué programas se inician automáticamente al encender la PC?"
+*   **Tareas programadas:** "¿Hay tareas programadas sospechosas que ejecuten scripts o comandos extraños?"
+*   **Exclusiones de Antivirus:** "¿Hay alguna exclusión en Microsoft Defender que yo no haya configurado?" (Esto es común para ocultar malware).
+*   **Procesos sospechosos:** "¿Hay algún proceso ejecutándose desde una carpeta de usuario o que no tenga firma digital válida?"
+*   **Limpieza de logs:** "¿Se han borrado los registros de eventos del sistema recientemente?" (Un indicador crítico de actividad de un atacante).
+
+### 3. Análisis de Red (Conectividad)
+Para detectar comunicaciones con servidores externos o puertos abiertos:
+*   **Conexiones activas:** "¿A qué direcciones IP se está conectando mi computadora en este momento?"
+*   **Puertos abiertos:** "¿Qué puertos tengo abiertos y escuchando en mi red local?"
+*   **Identificación de tráfico:** "Veo tráfico hacia la IP [X.X.X.X], ¿qué programa en mi PC es el responsable de esa conexión?"
+*   **Configuración de red:** "¿Cuál es mi dirección IP, la puerta de enlace y los DNS que estoy usando?"
+
+### 4. Análisis de Capturas de Tráfico (PCAP)
+Si tienes archivos de captura de red, puedo ayudarte a interpretarlos:
+*   **Búsqueda de archivos:** "¿Dónde están guardados los archivos de captura (.pcap) en este equipo?"
+*   **Filtros de captura:** "Dime qué filtro debo usar en Wireshark para analizar el tráfico de esta máquina sin que se llene de ruido innecesario."
+
+### 5. Generación de Reportes
+*   **Reporte de Triaje:** "Genera un reporte completo de seguridad de esta máquina" (Esto crea un dashboard HTML con todos los hallazgos de las herramientas anteriores).
+*   **Historial de reportes:** "¿Qué reportes de seguridad he generado anteriormente?"
+
+---
+
+**En resumen, puedes pedirme que:**
+1.  **Investigue** si hay algo raro en el sistema.
+2.  **Identifique** qué aplicaciones están haciendo qué cosas (red, archivos, procesos).
+3.  **Explique** por qué ciertos comportamientos son sospechosos basándome en los datos técnicos.
+4.  **Documente** todo en un reporte profesional o lo envíe por correo electrónico.
+
+---
+
 Ruta absoluta al intérprete concreto, no `"python"` a secas, y barras dobladas. El
 capítulo 16 explica por qué eso se lleva la mitad de las horas perdidas de todo el mundo.
 
